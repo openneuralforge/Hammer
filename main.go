@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 func main() {
-	fmt.Println("---SIMPLE---")
+	/*fmt.Println("---SIMPLE---")
 	simple1()
 	fmt.Println("---Quantum---")
 	RunQuantumExample()
@@ -13,4 +13,9 @@ func main() {
 	testFullRangeOfNeuronsNCA()
 	fmt.Println("---testNeuroCellularAutomataWithCNNKernels---")
 	testNeuroCellularAutomataWithCNNKernels()
+	*/
+	fmt.Println("---testMutations---")
+	testMutations()
+	fmt.Println("---testMutationsWithMultipleTypes---")
+	testMutationsWithMultipleTypes()
 }
