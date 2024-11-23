@@ -125,6 +125,7 @@ func testAllNeuronTypes() {
 		"dropout",
 		"batch_norm",
 		"attention",
+		"nca",
 	}
 
 	// Insert each neuron type between inputs and outputs
