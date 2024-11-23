@@ -20,4 +20,13 @@ func main() {
 	testMutationsWithMultipleTypes()
 	fmt.Println("---testAllNeuronTypes---")
 	testAllNeuronTypes()
+
+	fmt.Println("-----------------")
+	fmt.Println("-----------------")
+	fmt.Println("-----------------")
+	fmt.Println("-----------------")
+	fmt.Println("---testBlueprintMethods---")
+	testBlueprintMethods()
+	fmt.Println("---TestRunBenchmark---")
+	TestRunBenchmark()
 }
