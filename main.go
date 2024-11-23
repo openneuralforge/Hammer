@@ -18,4 +18,6 @@ func main() {
 	testMutations()
 	fmt.Println("---testMutationsWithMultipleTypes---")
 	testMutationsWithMultipleTypes()
+	fmt.Println("---testAllNeuronTypes---")
+	testAllNeuronTypes()
 }

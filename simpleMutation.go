@@ -90,3 +90,59 @@ func testMutationsWithMultipleTypes() {
 	fmt.Println("---Running Network After Multiple Mutations---")
 	bp.RunNetwork(inputs, 5)
 }
+
+func testAllNeuronTypes() {
+	// Example JSON configuration for a simple network
+	const neuronConfig = `
+		[
+			{"id": 1, "type": "input", "value": 0, "connections": []},
+			{"id": 2, "type": "input", "value": 0, "connections": []},
+			{"id": 3, "type": "dense", "bias": 0.1, "activation": "relu", "connections": [[1, 0.5], [2, 0.3]]},
+			{"id": 4, "type": "output", "bias": 0.0, "activation": "linear", "connections": [[3, 1.0]]}
+		]
+	`
+
+	// Initialize neural network blueprint
+	bp := blueprint.NewBlueprint()
+
+	// Load neurons from JSON configuration
+	err := bp.LoadNeurons(neuronConfig)
+	if err != nil {
+		fmt.Printf("Error loading neurons: %v\n", err)
+		return
+	}
+
+	// Define input and output nodes
+	bp.AddInputNodes([]int{1, 2})
+	bp.AddOutputNodes([]int{4})
+
+	// Define all supported neuron types
+	neuronTypes := []string{
+		"dense",
+		"rnn",
+		"lstm",
+		"cnn",
+		"dropout",
+		"batch_norm",
+		"attention",
+	}
+
+	// Insert each neuron type between inputs and outputs
+	for _, neuronType := range neuronTypes {
+		err = bp.InsertNeuronOfTypeBetweenInputsAndOutputs(neuronType)
+		if err != nil {
+			fmt.Printf("Error inserting neuron of type '%s': %v\n", neuronType, err)
+			return
+		}
+	}
+
+	// Define inputs
+	inputs := map[int]float64{
+		1: 1.0,
+		2: -1.5,
+	}
+
+	// Run the network with specified timesteps
+	fmt.Println("---Running Network After Inserting All Neuron Types---")
+	bp.RunNetwork(inputs, 5)
+}
