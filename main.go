@@ -31,5 +31,7 @@ func main() {
 	TestRunBenchmark()*/
 
 	fmt.Println("---simpleNAS---")
-	simpleNAS()
+	//simpleNAS()
+	fmt.Println("---simpleNASWithoutCrossover---")
+	simpleNASWithoutCrossover()
 }
