@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 func main() {
-	fmt.Println("---SIMPLE---")
+	/*fmt.Println("---SIMPLE---")
 	simple1()
 	fmt.Println("---Quantum---")
 	RunQuantumExample()
@@ -28,5 +28,8 @@ func main() {
 	fmt.Println("---testBlueprintMethods---")
 	testBlueprintMethods()
 	fmt.Println("---TestRunBenchmark---")
-	TestRunBenchmark()
+	TestRunBenchmark()*/
+
+	fmt.Println("---simpleNAS---")
+	simpleNAS()
 }
