@@ -189,3 +189,104 @@ func simpleNASWithoutCrossover() {
 		fmt.Println(jsonStr)
 	}
 }
+
+func testWithRandomConnections() {
+	// Seed the random number generator
+	rand.Seed(time.Now().UnixNano())
+
+	// Initialize neural network blueprint
+	bp := blueprint.NewBlueprint()
+
+	// Define input and output nodes
+	bp.AddInputNodes([]int{1, 2})
+	bp.AddOutputNodes([]int{3})
+
+	// Add input neurons to the blueprint
+	bp.Neurons[1] = &blueprint.Neuron{
+		ID:   1,
+		Type: "input",
+	}
+	bp.Neurons[2] = &blueprint.Neuron{
+		ID:   2,
+		Type: "input",
+	}
+
+	// Add output neuron to the blueprint
+	bp.Neurons[3] = &blueprint.Neuron{
+		ID:          3,
+		Type:        "output",
+		Activation:  "linear",
+		Connections: [][]float64{}, // No initial connections
+	}
+
+	// Define a simple linear relationship dataset
+	sessions := []blueprint.Session{
+		{
+			InputVariables: map[int]float64{
+				1: 1.0,
+				2: 2.0,
+			},
+			ExpectedOutput: map[int]float64{
+				3: 3.0, // Output = Input1 + Input2
+			},
+			Timesteps: 1,
+		},
+		{
+			InputVariables: map[int]float64{
+				1: 0.0,
+				2: 2.0,
+			},
+			ExpectedOutput: map[int]float64{
+				3: 2.0, // Output = Input1 + Input2
+			},
+			Timesteps: 1,
+		},
+		{
+			InputVariables: map[int]float64{
+				1: -1.0,
+				2: 1.0,
+			},
+			ExpectedOutput: map[int]float64{
+				3: 0.0, // Output = Input1 + Input2
+			},
+			Timesteps: 1,
+		},
+		{
+			InputVariables: map[int]float64{
+				1: 2.5,
+				2: 3.5,
+			},
+			ExpectedOutput: map[int]float64{
+				3: 6.0, // Output = Input1 + Input2
+			},
+			Timesteps: 1,
+		},
+	}
+
+	// Set parameters for SimpleNASWithRandomConnections
+	maxIterations := 10000
+	forgivenessThreshold := 0.05 // 5%
+
+	neuronTypes := []string{"dense", "attention", "nca"}
+
+	// Perform NAS
+	bp.SimpleNASWithRandomConnections(sessions, maxIterations, forgivenessThreshold, neuronTypes)
+
+	// Test the final model
+	fmt.Println("Testing the final model on the hammer test with random connections:")
+	for _, session := range sessions {
+		bp.RunNetwork(session.InputVariables, session.Timesteps)
+		predictedOutput := bp.GetOutputs()
+		fmt.Printf("Input: %v, Expected Output: %v, Predicted Output: %v\n",
+			session.InputVariables, session.ExpectedOutput, predictedOutput)
+	}
+
+	// Display the final model as JSON
+	/*fmt.Println("Final model structure:")
+	jsonStr, err := bp.ToJSON()
+	if err != nil {
+		fmt.Printf("Error converting blueprint to JSON: %v\n", err)
+	} else {
+		fmt.Println(jsonStr)
+	}*/
+}

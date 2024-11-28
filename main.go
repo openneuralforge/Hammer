@@ -33,5 +33,8 @@ func main() {
 	fmt.Println("---simpleNAS---")
 	//simpleNAS()
 	fmt.Println("---simpleNASWithoutCrossover---")
-	simpleNASWithoutCrossover()
+	//simpleNASWithoutCrossover()
+
+	fmt.Println("---testWithRandomConnections---")
+	testWithRandomConnections()
 }
