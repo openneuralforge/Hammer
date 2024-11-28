@@ -196,6 +196,7 @@ func testWithRandomConnections() {
 
 	// Initialize neural network blueprint
 	bp := blueprint.NewBlueprint()
+	bp.Debug = false
 
 	// Define input and output nodes
 	bp.AddInputNodes([]int{1, 2})
@@ -264,13 +265,25 @@ func testWithRandomConnections() {
 	}
 
 	// Set parameters for SimpleNASWithRandomConnections
-	maxIterations := 10000
+	maxIterations := 1000
 	forgivenessThreshold := 0.05 // 5%
 
-	neuronTypes := []string{"dense", "attention", "nca"}
+	neuronTypes := []string{
+		"dense",
+		"rnn",
+		//"lstm",
+		"cnn",
+		"dropout",
+		"batch_norm",
+		"attention",
+		"nca",
+	}
+
+	weightUpdateIterations := 10 // Number of weight update steps per NAS iteration
 
 	// Perform NAS
-	bp.SimpleNASWithRandomConnections(sessions, maxIterations, forgivenessThreshold, neuronTypes)
+	bp.SimpleNASWithRandomConnections(sessions, maxIterations, forgivenessThreshold, neuronTypes, weightUpdateIterations)
+	//bp.SimpleNASWithRandomConnections(sessions, maxIterations, forgivenessThreshold, neuronTypes)
 
 	// Test the final model
 	fmt.Println("Testing the final model on the hammer test with random connections:")
