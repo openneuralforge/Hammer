@@ -265,7 +265,7 @@ func testWithRandomConnections() {
 	}
 
 	// Set parameters for SimpleNASWithRandomConnections
-	maxIterations := 1000
+	maxIterations := 100000
 	forgivenessThreshold := 0.05 // 5%
 
 	neuronTypes := []string{
@@ -292,6 +292,12 @@ func testWithRandomConnections() {
 		predictedOutput := bp.GetOutputs()
 		fmt.Printf("Input: %v, Expected Output: %v, Predicted Output: %v\n",
 			session.InputVariables, session.ExpectedOutput, predictedOutput)
+	}
+
+	err := bp.SaveToJSON("output/nastest.json")
+	if err != nil {
+		fmt.Printf("Error saving Blueprint to file: %v\n", err)
+		return
 	}
 
 	// Display the final model as JSON

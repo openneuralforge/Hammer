@@ -1,0 +1,325 @@
+{
+  "neurons": {
+    "1": {
+      "id": 1,
+      "type": "dense",
+      "value": -0.5304418409693764,
+      "bias": 0.6656730194056273,
+      "connections": [
+        [
+          1,
+          0.6310670896666823
+        ],
+        [
+          2,
+          0.9068049131475278
+        ]
+      ],
+      "activation": "leaky_relu",
+      "loop_count": 0,
+      "window_size": 0,
+      "dropout_rate": 0,
+      "batch_norm": false,
+      "batch_norm_params": null,
+      "attention": false,
+      "attention_weights": null,
+      "kernels": null,
+      "CellState": 0,
+      "GateWeights": null,
+      "neighborhood": null,
+      "update_rules": "",
+      "nca_state": null
+    },
+    "2": {
+      "id": 2,
+      "type": "rnn",
+      "value": 0.843786517222991,
+      "bias": -0.04133541420517384,
+      "connections": [
+        [
+          1,
+          0.21267157323976638
+        ],
+        [
+          2,
+          0.604294891136673
+        ]
+      ],
+      "activation": "tanh",
+      "loop_count": 0,
+      "window_size": 0,
+      "dropout_rate": 0,
+      "batch_norm": false,
+      "batch_norm_params": null,
+      "attention": false,
+      "attention_weights": null,
+      "kernels": null,
+      "CellState": 0,
+      "GateWeights": null,
+      "neighborhood": null,
+      "update_rules": "",
+      "nca_state": null
+    },
+    "3": {
+      "id": 3,
+      "type": "lstm",
+      "value": 0.8845589259585025,
+      "bias": -0.09935034199259207,
+      "connections": [
+        [
+          1,
+          0.9794624968770966
+        ],
+        [
+          2,
+          0.6451406022082684
+        ],
+        [
+          3,
+          -0.9617419482760493
+        ],
+        [
+          4,
+          -0.6862592917660808
+        ],
+        [
+          5,
+          0.5449243263192334
+        ],
+        [
+          6,
+          -0.9103009358300006
+        ],
+        [
+          7,
+          -0.21270640982668987
+        ],
+        [
+          8,
+          -0.5042480255209189
+        ]
+      ],
+      "activation": "tanh",
+      "loop_count": 0,
+      "window_size": 0,
+      "dropout_rate": 0,
+      "batch_norm": false,
+      "batch_norm_params": null,
+      "attention": false,
+      "attention_weights": null,
+      "kernels": null,
+      "CellState": 0,
+      "GateWeights": {
+        "cell": [
+          0.013693013462869122,
+          0.750622256267024,
+          0.11844950355033432
+        ],
+        "forget": [
+          -0.19023343044612906,
+          -0.3093567118082964,
+          0.07504333981183359
+        ],
+        "input": [
+          -0.9943231160627455,
+          -0.4811844619758718,
+          0.36406482195884005
+        ],
+        "output": [
+          -0.7099299745826052,
+          0.8295560464264043,
+          -0.11005919003004516
+        ]
+      },
+      "neighborhood": null,
+      "update_rules": "",
+      "nca_state": null
+    },
+    "4": {
+      "id": 4,
+      "type": "cnn",
+      "value": 0.9044250642657234,
+      "bias": 0.0721876080424868,
+      "connections": [
+        [
+          1,
+          -0.008985347588351345
+        ],
+        [
+          2,
+          0.3114824280955901
+        ]
+      ],
+      "activation": "tanh",
+      "loop_count": 0,
+      "window_size": 0,
+      "dropout_rate": 0,
+      "batch_norm": false,
+      "batch_norm_params": null,
+      "attention": false,
+      "attention_weights": null,
+      "kernels": [
+        [
+          0.2,
+          0.5
+        ],
+        [
+          0.3,
+          0.4
+        ]
+      ],
+      "CellState": 0,
+      "GateWeights": null,
+      "neighborhood": null,
+      "update_rules": "",
+      "nca_state": null
+    },
+    "5": {
+      "id": 5,
+      "type": "dropout",
+      "value": 0.906935058406968,
+      "bias": 0.49461865886019796,
+      "connections": [
+        [
+          1,
+          0.9505456356221391
+        ],
+        [
+          2,
+          -0.7857747770176913
+        ]
+      ],
+      "activation": "linear",
+      "loop_count": 0,
+      "window_size": 0,
+      "dropout_rate": 0.5,
+      "batch_norm": false,
+      "batch_norm_params": null,
+      "attention": false,
+      "attention_weights": null,
+      "kernels": null,
+      "CellState": 0,
+      "GateWeights": null,
+      "neighborhood": null,
+      "update_rules": "",
+      "nca_state": null
+    },
+    "6": {
+      "id": 6,
+      "type": "batch_norm",
+      "value": 0.13811241926034423,
+      "bias": 0.010004023893495528,
+      "connections": [
+        [
+          1,
+          0.6743110982152374
+        ],
+        [
+          2,
+          -0.5525401165079087
+        ]
+      ],
+      "activation": "relu",
+      "loop_count": 0,
+      "window_size": 0,
+      "dropout_rate": 0,
+      "batch_norm": false,
+      "batch_norm_params": {
+        "gamma": 1,
+        "beta": 0,
+        "mean": 0,
+        "var": 1
+      },
+      "attention": false,
+      "attention_weights": null,
+      "kernels": null,
+      "CellState": 0,
+      "GateWeights": null,
+      "neighborhood": null,
+      "update_rules": "",
+      "nca_state": null
+    },
+    "7": {
+      "id": 7,
+      "type": "attention",
+      "value": -0.4380277530141412,
+      "bias": 0.007080459122947191,
+      "connections": [
+        [
+          1,
+          -0.18979714267481473
+        ],
+        [
+          2,
+          -0.10465884410941828
+        ]
+      ],
+      "activation": "tanh",
+      "loop_count": 0,
+      "window_size": 0,
+      "dropout_rate": 0,
+      "batch_norm": false,
+      "batch_norm_params": null,
+      "attention": true,
+      "attention_weights": [],
+      "kernels": null,
+      "CellState": 0,
+      "GateWeights": null,
+      "neighborhood": null,
+      "update_rules": "",
+      "nca_state": null
+    },
+    "8": {
+      "id": 8,
+      "type": "nca",
+      "value": -0.05934480591524993,
+      "bias": -0.8882260025605423,
+      "connections": [
+        [
+          1,
+          0.5993019118544824
+        ],
+        [
+          2,
+          -0.25250963543075666
+        ]
+      ],
+      "activation": "relu",
+      "loop_count": 0,
+      "window_size": 0,
+      "dropout_rate": 0,
+      "batch_norm": false,
+      "batch_norm_params": null,
+      "attention": false,
+      "attention_weights": null,
+      "kernels": null,
+      "CellState": 0,
+      "GateWeights": null,
+      "neighborhood": [
+        1,
+        2
+      ],
+      "update_rules": "sum",
+      "nca_state": [
+        -0.823936589475218,
+        -0.8136277566046554,
+        -0.1231396326337949,
+        0.9294170520585263,
+        0.14663653529394338,
+        0.8149101103993379,
+        -0.6652561052499225,
+        0.14084698946348273,
+        -0.6991512152859058,
+        0.4987716446851824
+      ]
+    }
+  },
+  "quant": {},
+  "input_nodes": [
+    1,
+    2
+  ],
+  "output_nodes": [
+    3
+  ]
+}

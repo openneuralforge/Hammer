@@ -30,11 +30,14 @@ func main() {
 	fmt.Println("---TestRunBenchmark---")
 	TestRunBenchmark()*/
 
-	fmt.Println("---simpleNAS---")
+	/*fmt.Println("---simpleNAS---")
 	//simpleNAS()
 	fmt.Println("---simpleNASWithoutCrossover---")
 	//simpleNASWithoutCrossover()
 
 	fmt.Println("---testWithRandomConnections---")
+	testWithRandomConnections()*/
 	testWithRandomConnections()
+	fmt.Println("---createAndSaveAllNeuronTypesToFile---")
+	createAndSaveAllNeuronTypesToFile("output/test.json")
 }
