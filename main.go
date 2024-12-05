@@ -27,8 +27,7 @@ func main() {
 	fmt.Println("-----------------")
 	fmt.Println("---testBlueprintMethods---")
 	testBlueprintMethods()
-	fmt.Println("---TestRunBenchmark---")
-	TestRunBenchmark()*/
+	*/
 
 	/*fmt.Println("---simpleNAS---")
 	//simpleNAS()
@@ -37,7 +36,13 @@ func main() {
 
 	fmt.Println("---testWithRandomConnections---")
 	testWithRandomConnections()*/
-	testWithRandomConnections()
+	/*testWithRandomConnections()
 	fmt.Println("---createAndSaveAllNeuronTypesToFile---")
-	createAndSaveAllNeuronTypesToFile("output/test.json")
+	createAndSaveAllNeuronTypesToFile("output/test.json")*/
+
+	fmt.Println("---TestGpuRunBenchmark---")
+	TestGpuRunBenchmark()
+
+	fmt.Println("---TestRunBenchmark---")
+	TestRunBenchmark()
 }

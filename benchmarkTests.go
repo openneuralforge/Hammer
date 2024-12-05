@@ -29,3 +29,17 @@ func TestRunBenchmark() {
 	fmt.Printf("Max Float64 Multi-threaded Layers: %s\n", maxLayers64Multi)
 	fmt.Println("\nBenchmark complete.")
 }
+
+func TestGpuRunBenchmark() {
+	bp := blueprint.NewBlueprint()
+	duration := 10 * time.Second // Set the benchmark duration
+
+	fmt.Println("Starting GPU Benchmark...")
+	opsGPU, err := bp.RunGPUBenchmark(duration)
+	if err != nil {
+		fmt.Println("GPU Benchmark Error:", err)
+		return
+	}
+	fmt.Printf("GPU Operations Per Second: %s\n", bp.FormatNumber(opsGPU))
+
+}
