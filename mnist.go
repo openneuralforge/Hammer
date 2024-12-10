@@ -17,8 +17,10 @@ import (
 )
 
 const (
-	baseURL  = "https://storage.googleapis.com/cvdf-datasets/mnist/"
-	mnistDir = "mnist"
+	baseURL   = "https://storage.googleapis.com/cvdf-datasets/mnist/"
+	mnistDir  = "mnist"
+	modelDir  = "models" // New directory for saving models
+	modelName = "mnist_model.json"
 )
 
 func simpleMnist() {
@@ -257,7 +259,7 @@ func TrainOnMNIST(bp *blueprint.Blueprint, mnistOutputDir string) error {
 	}
 
 	// Parameters for NAS
-	maxIterations := 10 // Reduced for demonstration
+	maxIterations := 10 // Adjust as needed
 	forgivenessThreshold := 0.1
 	neuronTypes := []string{"dense", "rnn", "cnn", "dropout", "attention"}
 	weightUpdateIterations := 10
@@ -276,12 +278,16 @@ func TrainOnMNIST(bp *blueprint.Blueprint, mnistOutputDir string) error {
 		30.0, // improvementThreshold for exact accuracy
 	)
 
-	// After refinement, try adding new connections
+	// After refinement, try adding new connections using the improved multithreaded method
 	fmt.Println("Trying to add new connections to improve accuracy...")
-	bp.TryAddConnections(sessions, forgivenessThreshold, 50) // up to 50 attempts
+	bp.TryAddConnections(sessions, forgivenessThreshold, 50) // up to 50 unique connection attempts
+
+	// Perform learning by processing one data item at a time
+	fmt.Println("\nStarting LearnOneDataItemAtATime phase...")
+	bp.LearnOneDataItemAtATime(sessions, forgivenessThreshold, 10, neuronTypes, 5) // Adjust maxAttemptsPerSession as needed
 
 	// Test the final model on a few samples
-	fmt.Println("Testing the final model (raw predictions):")
+	fmt.Println("\nTesting the final model (raw predictions):")
 	for i, session := range sessions[:10] {
 		bp.RunNetwork(session.InputVariables, session.Timesteps)
 		predictedOutput := bp.GetOutputs()
@@ -291,19 +297,26 @@ func TrainOnMNIST(bp *blueprint.Blueprint, mnistOutputDir string) error {
 		predClass := argmaxMap(probs)
 		expClass := argmaxMap(session.ExpectedOutput)
 
-		fmt.Printf("Test %d: Expected: %d, Predicted: %d, Probabilities: %v\n", i, expClass, predClass, probs)
+		fmt.Printf("Test %d: Expected: %d, Predicted: %d, Probabilities: %v\n", i+1, expClass, predClass, probs)
 	}
 
-	// Save the model
-	if err := bp.SaveToJSON(filepath.Join(mnistDir, "output", "mnist_model.json")); err != nil {
+	// Ensure the models directory exists
+	completeModelDir := filepath.Join(mnistDir, modelDir)
+	if err := os.MkdirAll(completeModelDir, os.ModePerm); err != nil {
+		return fmt.Errorf("failed to create models directory: %w", err)
+	}
+
+	// Save the model to mnist/models/mnist_model.json
+	modelPath := filepath.Join(completeModelDir, modelName)
+	if err := bp.SaveToJSON(modelPath); err != nil {
 		return fmt.Errorf("failed to save model: %w", err)
 	}
 
-	fmt.Println("Training complete. Model saved to mnist_model.json")
+	fmt.Printf("\nTraining complete. Model saved to %s\n", modelPath)
 	return nil
 }
 
-// softmaxMap applies softmax to the values in a map and returns a new map with probabilities
+// softmaxMap applies softmax to the values in a map and returns a new map with probabilities.
 func softmaxMap(m map[int]float64) map[int]float64 {
 	var sumExp float64
 	for _, v := range m {
@@ -316,7 +329,7 @@ func softmaxMap(m map[int]float64) map[int]float64 {
 	return probs
 }
 
-// argmaxMap returns the key of the maximum value in the map
+// argmaxMap returns the key of the maximum value in the map.
 func argmaxMap(m map[int]float64) int {
 	var maxKey int
 	var maxVal float64 = -math.MaxFloat64
