@@ -9,7 +9,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-
+	"math/rand"
+	"time"
 	"blueprint"
 )
 
@@ -33,6 +34,11 @@ func simpleMnist() {
 
 	if err := UnpackMNIST(imageFile, labelFile, outputDir); err != nil {
 		log.Fatalf("Failed to unpack MNIST data: %v", err)
+	}
+
+	// Train the model using SimpleNASWithoutCrossover
+	if err := TrainOnMNIST(bp, outputDir); err != nil {
+		log.Fatalf("Failed to train on MNIST data: %v", err)
 	}
 }
 
@@ -159,5 +165,105 @@ func UnpackMNIST(imageFile, labelFile, outputDir string) error {
 	}
 
 	log.Println("MNIST unpacked successfully.")
+	return nil
+}
+
+// TrainOnMNIST trains the neural network using the MNIST dataset.
+func TrainOnMNIST(bp *blueprint.Blueprint, mnistOutputDir string) error {
+	rand.Seed(time.Now().UnixNano())
+
+	// Load the label map
+	labelMapPath := filepath.Join(mnistOutputDir, "labels.json")
+	labelMapFile, err := os.Open(labelMapPath)
+	if err != nil {
+		return fmt.Errorf("failed to open label map file: %w", err)
+	}
+	defer labelMapFile.Close()
+
+	var labelMap map[string]int
+	if err := json.NewDecoder(labelMapFile).Decode(&labelMap); err != nil {
+		return fmt.Errorf("failed to decode label map: %w", err)
+	}
+
+	// Create sessions
+	var sessions []blueprint.Session
+	for imgFilename, label := range labelMap {
+		imgPath := filepath.Join(mnistOutputDir, imgFilename)
+		imgFile, err := os.Open(imgPath)
+		if err != nil {
+			return fmt.Errorf("failed to open image file %s: %w", imgPath, err)
+		}
+
+		img, err := png.Decode(imgFile)
+		imgFile.Close()
+		if err != nil {
+			return fmt.Errorf("failed to decode image %s: %w", imgPath, err)
+		}
+
+		// Flatten the image into input variables
+		inputVars := make(map[int]float64)
+		grayImg := img.(*image.Gray)
+		for i, pixel := range grayImg.Pix {
+			inputVars[i+1] = float64(pixel) / 255.0 // Normalize to [0, 1]
+		}
+
+		// Add the session
+		sessions = append(sessions, blueprint.Session{
+			InputVariables: inputVars,
+			ExpectedOutput: map[int]float64{
+				1: float64(label), // Assume a single output neuron
+			},
+			Timesteps: 1,
+		})
+	}
+
+	// Define input and output nodes
+	inputNodes := make([]int, len(sessions[0].InputVariables))
+	for i := range inputNodes {
+		inputNodes[i] = i + 1
+	}
+	outputNodes := []int{1}
+
+	bp.AddInputNodes(inputNodes)
+	bp.AddOutputNodes(outputNodes)
+
+	// Initialize neurons
+	for _, id := range inputNodes {
+		bp.Neurons[id] = &blueprint.Neuron{
+			ID:   id,
+			Type: "input",
+		}
+	}
+	bp.Neurons[1] = &blueprint.Neuron{
+		ID:          1,
+		Type:        "output",
+		Activation:  "softmax",
+		Connections: [][]float64{},
+	}
+
+	// Set parameters for SimpleNASWithoutCrossover
+	maxIterations := 65000
+	forgivenessThreshold := 0.1 // 10%
+	neuronTypes := []string{"dense", "dropout", "batch_norm", "attention"}
+	metrics := []string{"exact"}
+
+	// Perform SimpleNASWithoutCrossover
+	fmt.Println("Training the model with SimpleNASWithoutCrossover...")
+	bp.SimpleNASWithoutCrossover(sessions, maxIterations, forgivenessThreshold, neuronTypes, metrics)
+
+	// Test the final model
+	fmt.Println("Testing the final model:")
+	for _, session := range sessions[:10] { // Test on the first 10 sessions
+		bp.RunNetwork(session.InputVariables, session.Timesteps)
+		predictedOutput := bp.GetOutputs()
+		fmt.Printf("Input: %v, Expected Output: %v, Predicted Output: %v\n", session.InputVariables, session.ExpectedOutput, predictedOutput)
+	}
+
+	// Save the model
+	if err := bp.SaveToJSON(filepath.Join(mnistOutputDir, "mnist_model.json")); err != nil {
+		return fmt.Errorf("failed to save model: %w", err)
+	}
+
+	fmt.Println("Training complete. Model saved to mnist_model.json")
 	return nil
 }
