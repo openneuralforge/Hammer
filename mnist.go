@@ -7,10 +7,11 @@ import (
 	"image"
 	"image/png"
 	"log"
+	"math/rand"
 	"os"
 	"path/filepath"
-	"math/rand"
 	"time"
+	"math"
 	"blueprint"
 )
 
@@ -36,7 +37,7 @@ func simpleMnist() {
 		log.Fatalf("Failed to unpack MNIST data: %v", err)
 	}
 
-	// Train the model using SimpleNASWithoutCrossover
+	// Train the model
 	if err := TrainOnMNIST(bp, outputDir); err != nil {
 		log.Fatalf("Failed to train on MNIST data: %v", err)
 	}
@@ -187,6 +188,7 @@ func TrainOnMNIST(bp *blueprint.Blueprint, mnistOutputDir string) error {
 
 	// Create sessions
 	var sessions []blueprint.Session
+	var inputSize int
 	for imgFilename, label := range labelMap {
 		imgPath := filepath.Join(mnistOutputDir, imgFilename)
 		imgFile, err := os.Open(imgPath)
@@ -200,75 +202,88 @@ func TrainOnMNIST(bp *blueprint.Blueprint, mnistOutputDir string) error {
 			return fmt.Errorf("failed to decode image %s: %w", imgPath, err)
 		}
 
-		// Flatten the image into input variables
-		inputVars := make(map[int]float64)
 		grayImg := img.(*image.Gray)
+		inputVars := make(map[int]float64)
 		for i, pixel := range grayImg.Pix {
-			inputVars[i+1] = float64(pixel) / 255.0 // Normalize to [0, 1]
+			inputVars[i+1] = float64(pixel) / 255.0 // Normalize [0, 1]
+		}
+		inputSize = len(grayImg.Pix) // 784 for MNIST
+
+		// Set up one-hot expected output for digits 0 through 9
+		// We'll use nodes 80001 to 80010 for outputs
+		expectedOutput := make(map[int]float64)
+		for digit := 0; digit < 10; digit++ {
+			outNodeID := 80001 + digit
+			if digit == label {
+				expectedOutput[outNodeID] = 1.0
+			} else {
+				expectedOutput[outNodeID] = 0.0
+			}
 		}
 
-		// Add the session
 		sessions = append(sessions, blueprint.Session{
 			InputVariables: inputVars,
-			ExpectedOutput: map[int]float64{
-				1: float64(label), // Assume a single output neuron
-			},
-			Timesteps: 1,
+			ExpectedOutput: expectedOutput,
+			Timesteps:      1,
 		})
 	}
 
 	// Define input and output nodes
-	inputNodes := make([]int, len(sessions[0].InputVariables))
-	for i := range inputNodes {
+	inputNodes := make([]int, inputSize)
+	for i := 0; i < inputSize; i++ {
 		inputNodes[i] = i + 1
 	}
-	outputNodes := []int{1}
+	outputNodes := []int{80001, 80002, 80003, 80004, 80005, 80006, 80007, 80008, 80009, 80010}
 
 	bp.AddInputNodes(inputNodes)
 	bp.AddOutputNodes(outputNodes)
 
-	// Initialize neurons
+	// Initialize input neurons
 	for _, id := range inputNodes {
 		bp.Neurons[id] = &blueprint.Neuron{
 			ID:   id,
 			Type: "input",
 		}
 	}
-	bp.Neurons[1] = &blueprint.Neuron{
-		ID:          1,
-		Type:        "output",
-		Activation:  "softmax",
-		Connections: [][]float64{},
+
+	// Initialize output neurons as linear
+	for _, outID := range outputNodes {
+		bp.Neurons[outID] = &blueprint.Neuron{
+			ID:          outID,
+			Type:        "output",
+			Activation:  "linear", 
+			Connections: [][]float64{},
+		}
 	}
 
-	// Set parameters for SimpleNASWithoutCrossover
-	maxIterations := 65000
-	forgivenessThreshold := 0.1 // 10%
+	// Parameters for NAS
+	maxIterations := 100 // Reduced for demonstration; you can set 65000 if desired
+	forgivenessThreshold := 0.1
 	neuronTypes := []string{
 		"dense",
 		"rnn",
-		//"lstm",
 		"cnn",
 		"dropout",
-		//"batch_norm",
 		"attention",
-		//"nca",
 	}
-	//metrics := []string{"exact","generous","forgiveness"}
-	weightUpdateIterations := 10 // Number of weight update steps per NAS iteration
+	weightUpdateIterations := 10
 
-	// Perform SimpleNASWithoutCrossover
 	fmt.Println("Training the model with ParallelSimpleNASWithRandomConnections...")
-	//bp.SimpleNASWithRandomConnections(sessions, maxIterations, forgivenessThreshold, neuronTypes, metrics)
-	//bp.SimpleNASWithRandomConnections(sessions, maxIterations, forgivenessThreshold, neuronTypes, weightUpdateIterations)
+
 	bp.ParallelSimpleNASWithRandomConnections(sessions, maxIterations, forgivenessThreshold, neuronTypes, weightUpdateIterations)
-	
-	// Test the final model
-	fmt.Println("Testing the final model:")
-	for _, session := range sessions[:10] { // Test on the first 10 sessions
+
+	// Test the final model on a few samples
+	fmt.Println("Testing the final model (raw predictions):")
+	for i, session := range sessions[:10] { // Test on first 10 sessions
 		bp.RunNetwork(session.InputVariables, session.Timesteps)
 		predictedOutput := bp.GetOutputs()
-		fmt.Printf("Input: %v, Expected Output: %v, Predicted Output: %v\n", session.InputVariables, session.ExpectedOutput, predictedOutput)
+
+		// Apply softmax to predictedOutput
+		probs := softmaxMap(predictedOutput)
+		predClass := argmaxMap(probs)
+		expClass := argmaxMap(session.ExpectedOutput)
+
+		fmt.Printf("Test %d: Expected: %d, Predicted: %d, Probabilities: %v\n", i, expClass, predClass, probs)
 	}
 
 	// Save the model
@@ -278,4 +293,30 @@ func TrainOnMNIST(bp *blueprint.Blueprint, mnistOutputDir string) error {
 
 	fmt.Println("Training complete. Model saved to mnist_model.json")
 	return nil
+}
+
+// softmaxMap applies softmax to the values in a map and returns a new map with probabilities
+func softmaxMap(m map[int]float64) map[int]float64 {
+	var sumExp float64
+	for _, v := range m {
+		sumExp += math.Exp(v)
+	}
+	probs := make(map[int]float64)
+	for k, v := range m {
+		probs[k] = math.Exp(v) / sumExp
+	}
+	return probs
+}
+
+// argmaxMap returns the key of the maximum value in the map
+func argmaxMap(m map[int]float64) int {
+	var maxKey int
+	var maxVal float64 = -math.MaxFloat64
+	for k, v := range m {
+		if v > maxVal {
+			maxVal = v
+			maxKey = k
+		}
+	}
+	return maxKey - 80001 // Convert from neuron ID to class index (0-9)
 }
