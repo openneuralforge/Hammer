@@ -267,6 +267,20 @@ func TrainOnMNIST(bp *blueprint.Blueprint, mnistOutputDir string) error {
 	fmt.Println("Training the model with ParallelSimpleNASWithRandomConnections...")
 	bp.ParallelSimpleNASWithRandomConnections(sessions, maxIterations, forgivenessThreshold, neuronTypes, weightUpdateIterations)
 
+	// Initialize PerformanceLogger
+	logDir := filepath.Join(mnistDir, "log")
+	logger, err := blueprint.NewPerformanceLogger(logDir)
+	if err != nil {
+		log.Fatalf("Failed to initialize PerformanceLogger: %v", err)
+	}
+
+	// Evaluate and log performance for all sessions
+	if err := bp.EvaluateAndLogPerformance(sessions, logger); err != nil {
+		log.Fatalf("Failed to evaluate and log performance: %v", err)
+	}
+
+	log.Println("Performance evaluation and logging completed successfully.")
+
 	// After main training, try the targeted micro-refinement
 	fmt.Println("Applying Targeted Micro Refinement...")
 	bp.TargetedMicroRefinement(
