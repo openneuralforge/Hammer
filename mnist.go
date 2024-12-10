@@ -244,13 +244,25 @@ func TrainOnMNIST(bp *blueprint.Blueprint, mnistOutputDir string) error {
 	// Set parameters for SimpleNASWithoutCrossover
 	maxIterations := 65000
 	forgivenessThreshold := 0.1 // 10%
-	neuronTypes := []string{"dense", "dropout", "batch_norm", "attention"}
-	metrics := []string{"exact"}
+	neuronTypes := []string{
+		"dense",
+		"rnn",
+		//"lstm",
+		"cnn",
+		"dropout",
+		//"batch_norm",
+		"attention",
+		//"nca",
+	}
+	//metrics := []string{"exact","generous","forgiveness"}
+	weightUpdateIterations := 10 // Number of weight update steps per NAS iteration
 
 	// Perform SimpleNASWithoutCrossover
-	fmt.Println("Training the model with SimpleNASWithoutCrossover...")
-	bp.SimpleNASWithoutCrossover(sessions, maxIterations, forgivenessThreshold, neuronTypes, metrics)
-
+	fmt.Println("Training the model with ParallelSimpleNASWithRandomConnections...")
+	//bp.SimpleNASWithRandomConnections(sessions, maxIterations, forgivenessThreshold, neuronTypes, metrics)
+	//bp.SimpleNASWithRandomConnections(sessions, maxIterations, forgivenessThreshold, neuronTypes, weightUpdateIterations)
+	bp.ParallelSimpleNASWithRandomConnections(sessions, maxIterations, forgivenessThreshold, neuronTypes, weightUpdateIterations)
+	
 	// Test the final model
 	fmt.Println("Testing the final model:")
 	for _, session := range sessions[:10] { // Test on the first 10 sessions
