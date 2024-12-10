@@ -40,9 +40,11 @@ func main() {
 	fmt.Println("---createAndSaveAllNeuronTypesToFile---")
 	createAndSaveAllNeuronTypesToFile("output/test.json")*/
 
-	fmt.Println("---TestGpuRunBenchmark---")
-	TestGpuRunBenchmark()
+	//fmt.Println("---TestGpuRunBenchmark---")
+	//TestGpuRunBenchmark()
 
-	fmt.Println("---TestRunBenchmark---")
-	TestRunBenchmark()
+	//fmt.Println("---TestRunBenchmark---")
+	//TestRunBenchmark()
+	fmt.Println("---simpleMnist---")
+	simpleMnist()
 }

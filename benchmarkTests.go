@@ -31,7 +31,7 @@ func TestRunBenchmark() {
 }
 
 func TestGpuRunBenchmark() {
-	bp := blueprint.NewBlueprint()
+	/*bp := blueprint.NewBlueprint()
 	duration := 10 * time.Second // Set the benchmark duration
 
 	fmt.Println("Starting GPU Benchmark...")
@@ -41,5 +41,5 @@ func TestGpuRunBenchmark() {
 		return
 	}
 	fmt.Printf("GPU Operations Per Second: %s\n", bp.FormatNumber(opsGPU))
-
+	*/
 }
