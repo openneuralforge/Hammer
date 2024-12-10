@@ -7,11 +7,12 @@ import (
 	"image"
 	"image/png"
 	"log"
+	"math"
 	"math/rand"
 	"os"
 	"path/filepath"
 	"time"
-	"math"
+
 	"blueprint"
 )
 
@@ -115,8 +116,8 @@ func UnpackMNIST(imageFile, labelFile, outputDir string) error {
 	}
 
 	labelMap := make(map[string]int)
-
 	imgSize := int(imgRows * imgCols)
+
 	for i := 0; i < int(numImages); i++ {
 		imgData := make([]byte, imgSize)
 		if _, err := imgFile.Read(imgData); err != nil {
@@ -209,8 +210,7 @@ func TrainOnMNIST(bp *blueprint.Blueprint, mnistOutputDir string) error {
 		}
 		inputSize = len(grayImg.Pix) // 784 for MNIST
 
-		// Set up one-hot expected output for digits 0 through 9
-		// We'll use nodes 80001 to 80010 for outputs
+		// One-hot expected output
 		expectedOutput := make(map[int]float64)
 		for digit := 0; digit < 10; digit++ {
 			outNodeID := 80001 + digit
@@ -251,34 +251,42 @@ func TrainOnMNIST(bp *blueprint.Blueprint, mnistOutputDir string) error {
 		bp.Neurons[outID] = &blueprint.Neuron{
 			ID:          outID,
 			Type:        "output",
-			Activation:  "linear", 
+			Activation:  "linear",
 			Connections: [][]float64{},
 		}
 	}
 
 	// Parameters for NAS
-	maxIterations := 100 // Reduced for demonstration; you can set 65000 if desired
+	maxIterations := 10 // Reduced for demonstration
 	forgivenessThreshold := 0.1
-	neuronTypes := []string{
-		"dense",
-		"rnn",
-		"cnn",
-		"dropout",
-		"attention",
-	}
+	neuronTypes := []string{"dense", "rnn", "cnn", "dropout", "attention"}
 	weightUpdateIterations := 10
 
 	fmt.Println("Training the model with ParallelSimpleNASWithRandomConnections...")
-
 	bp.ParallelSimpleNASWithRandomConnections(sessions, maxIterations, forgivenessThreshold, neuronTypes, weightUpdateIterations)
+
+	// After main training, try the targeted micro-refinement
+	fmt.Println("Applying Targeted Micro Refinement...")
+	bp.TargetedMicroRefinement(
+		sessions,
+		forgivenessThreshold,
+		50,   // max refinement iterations
+		20,   // sampleSubsetSize
+		10,   // connectionTrialsPerSample
+		30.0, // improvementThreshold for exact accuracy
+	)
+
+	// After refinement, try adding new connections
+	fmt.Println("Trying to add new connections to improve accuracy...")
+	bp.TryAddConnections(sessions, forgivenessThreshold, 50) // up to 50 attempts
 
 	// Test the final model on a few samples
 	fmt.Println("Testing the final model (raw predictions):")
-	for i, session := range sessions[:10] { // Test on first 10 sessions
+	for i, session := range sessions[:10] {
 		bp.RunNetwork(session.InputVariables, session.Timesteps)
 		predictedOutput := bp.GetOutputs()
 
-		// Apply softmax to predictedOutput
+		// Apply softmax
 		probs := softmaxMap(predictedOutput)
 		predClass := argmaxMap(probs)
 		expClass := argmaxMap(session.ExpectedOutput)
@@ -287,7 +295,7 @@ func TrainOnMNIST(bp *blueprint.Blueprint, mnistOutputDir string) error {
 	}
 
 	// Save the model
-	if err := bp.SaveToJSON(filepath.Join(mnistOutputDir, "mnist_model.json")); err != nil {
+	if err := bp.SaveToJSON(filepath.Join(mnistDir, "output", "mnist_model.json")); err != nil {
 		return fmt.Errorf("failed to save model: %w", err)
 	}
 
@@ -318,5 +326,6 @@ func argmaxMap(m map[int]float64) int {
 			maxKey = k
 		}
 	}
-	return maxKey - 80001 // Convert from neuron ID to class index (0-9)
+	// Convert from neuron ID to class index (0-9)
+	return maxKey - 80001
 }
