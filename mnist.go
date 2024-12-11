@@ -263,14 +263,16 @@ func TrainOnMNIST(bp *blueprint.Blueprint, mnistOutputDir string) error {
 
 	neuronTypes := []string{"dense", "rnn", "cnn", "dropout", "attention"}
 	weightUpdateIterations := 10
+	maxTriesWithoutImprovement := 10
+	batches := 100
 
 	useHillClimbing := false       // Disable hill climbing
 	saveImprovedModel := true      // Enable saving improved models
 	saveLocation := "mnist/models" // Directory to save the models
 
-	fmt.Println("Training the model with ParallelSimpleNASWithRandomConnections...")
+	fmt.Println("Training the model with AdvancedParallelNASWithDynamicNeuronGeneration...")
 	// Run the NAS function
-	bp.ParallelSimpleNASWithRandomConnections(
+	bp.AdvancedParallelNASWithDynamicNeuronGeneration(
 		sessions,
 		maxIterations,
 		neuronTypes,
@@ -278,6 +280,8 @@ func TrainOnMNIST(bp *blueprint.Blueprint, mnistOutputDir string) error {
 		useHillClimbing,
 		saveImprovedModel,
 		saveLocation,
+		maxTriesWithoutImprovement,
+		batches,
 	)
 	// Initialize PerformanceLogger
 	logDir := filepath.Join(mnistDir, "log")
