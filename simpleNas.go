@@ -73,10 +73,9 @@ func simpleNAS() {
 
 	// Set parameters for SimpleNAS
 	maxIterations := 20000
-	forgivenessThreshold := 0.1 // 10%
 
 	// Perform SimpleNAS
-	bp.SimpleNAS(sessions, maxIterations, forgivenessThreshold)
+	bp.SimpleNAS(sessions, maxIterations)
 
 	// Test the final model
 	fmt.Println("Testing the final model:")

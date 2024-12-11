@@ -285,7 +285,6 @@ func TrainOnMNIST(bp *blueprint.Blueprint, mnistOutputDir string) error {
 	fmt.Println("Applying Targeted Micro Refinement...")
 	bp.TargetedMicroRefinement(
 		sessions,
-		forgivenessThreshold,
 		50,   // max refinement iterations
 		20,   // sampleSubsetSize
 		10,   // connectionTrialsPerSample
@@ -294,11 +293,11 @@ func TrainOnMNIST(bp *blueprint.Blueprint, mnistOutputDir string) error {
 
 	// After refinement, try adding new connections using the improved multithreaded method
 	fmt.Println("Trying to add new connections to improve accuracy...")
-	bp.TryAddConnections(sessions, forgivenessThreshold, 50) // up to 50 unique connection attempts
+	bp.TryAddConnections(sessions, 50) // up to 50 unique connection attempts
 
 	// Perform learning by processing one data item at a time
 	fmt.Println("\nStarting LearnOneDataItemAtATime phase...")
-	bp.LearnOneDataItemAtATime(sessions, forgivenessThreshold, 10, neuronTypes, 5) // Adjust maxAttemptsPerSession as needed
+	bp.LearnOneDataItemAtATime(sessions[:10], 10, neuronTypes, 5) // Adjust maxAttemptsPerSession as needed
 
 	// Test the final model on a few samples
 	fmt.Println("\nTesting the final model (raw predictions):")
