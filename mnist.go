@@ -264,9 +264,9 @@ func TrainOnMNIST(bp *blueprint.Blueprint, mnistOutputDir string) error {
 	neuronTypes := []string{"dense", "rnn", "cnn", "dropout", "attention"}
 	weightUpdateIterations := 10
 	maxTriesWithoutImprovement := 10
-	batches := 100
+	batches := 10
 
-	useHillClimbing := false       // Disable hill climbing
+	useHillClimbing := true        // Disable hill climbing
 	saveImprovedModel := true      // Enable saving improved models
 	saveLocation := "mnist/models" // Directory to save the models
 
