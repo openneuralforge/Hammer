@@ -259,13 +259,13 @@ func TrainOnMNIST(bp *blueprint.Blueprint, mnistOutputDir string) error {
 	}
 
 	// Parameters for NAS
-	maxIterations := 10 // Adjust as needed
-	forgivenessThreshold := 0.1
+	maxIterations := 10000 // Adjust as needed
+
 	neuronTypes := []string{"dense", "rnn", "cnn", "dropout", "attention"}
 	weightUpdateIterations := 10
 
 	fmt.Println("Training the model with ParallelSimpleNASWithRandomConnections...")
-	bp.ParallelSimpleNASWithRandomConnections(sessions, maxIterations, forgivenessThreshold, neuronTypes, weightUpdateIterations)
+	bp.ParallelSimpleNASWithRandomConnections(sessions, maxIterations, neuronTypes, weightUpdateIterations)
 
 	// Initialize PerformanceLogger
 	logDir := filepath.Join(mnistDir, "log")
@@ -292,12 +292,13 @@ func TrainOnMNIST(bp *blueprint.Blueprint, mnistOutputDir string) error {
 	)
 
 	// After refinement, try adding new connections using the improved multithreaded method
-	fmt.Println("Trying to add new connections to improve accuracy...")
+	/*fmt.Println("Trying to add new connections to improve accuracy...")
 	bp.TryAddConnections(sessions, 50) // up to 50 unique connection attempts
 
 	// Perform learning by processing one data item at a time
 	fmt.Println("\nStarting LearnOneDataItemAtATime phase...")
-	bp.LearnOneDataItemAtATime(sessions[:10], 10, neuronTypes, 5) // Adjust maxAttemptsPerSession as needed
+	bp.LearnOneDataItemAtATime(sessions, 10, neuronTypes, 5) // Adjust maxAttemptsPerSession as needed
+	*/
 
 	// Test the final model on a few samples
 	fmt.Println("\nTesting the final model (raw predictions):")
